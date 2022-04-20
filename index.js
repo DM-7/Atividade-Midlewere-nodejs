@@ -2,7 +2,8 @@ const express = require('express');
 const authorizationMiddlewere = require('./middleweres/authorizationMiddlwere');
 const cors = require('cors');
 const api = require('./services/API');
-const { validateEmail, validatePassword, generateToken } = require('./helpers')
+const { generateToken } = require('./helpers')
+const emailAndPasswordValidate = require('./middleweres/emailAndPasswordValidate');
 
 
 const app = express();
@@ -20,31 +21,20 @@ app.get("/btc/price", authorizationMiddlewere, async (req, res) => {
 
 // Atividade 1
 
-app.post('/user/register', (req, res) => {
-  const { username, email, password } = req.body;
+app.post('/user/register', emailAndPasswordValidate, (req, res) => {
+  const { username } = req.body;
 
   const isUsernameValid = username.length >= 3;
-  
-  const isEmailValid = validateEmail(email);
-  const isPasswordValid = validatePassword(password);
 
-  if ( isUsernameValid && isEmailValid && isPasswordValid ) {
+  if ( isUsernameValid ) {
     return res.status(201).json({ message: "Created" });
   }
 
   return res.status(400).json({ message: "Invalid data" });
 })
 
-app.post('/user/login', (req, res) => {
-  const { email, password } = req.body;
-
-  const isEmailValid = validateEmail(email);
-  const isPasswordValid = validatePassword(password);
-
-  if ( isEmailValid && isPasswordValid ) {
-    return res.status(201).json({ token: generateToken() });
-  }
-  return res.status(400).json({ message: "email or password is incorrect" });
+app.post('/user/login', emailAndPasswordValidate, (req, res) => {
+  return res.status(200).json({ token: generateToken() })
 })
 
 
